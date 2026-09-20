@@ -20,6 +20,7 @@
 
   function iniciar() {
     bindEventos();
+    $("anioActual").textContent = new Date().getFullYear();
     renderTodo();
   }
 
