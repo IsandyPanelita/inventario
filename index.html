@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Inventario y Ventas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1>Sistema de Inventario y Ventas</h1>
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-tab="inventario">Inventario</button>
+        <button class="tab" data-tab="ventas">Ventas</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ========== VISTA INVENTARIO ========== -->
+    <section class="vista active" id="vistaInventario">
+      <div class="alerts" id="alertasBajoStock"></div>
+
+      <section class="stats" id="stats">
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statProductos">0</span>
+            <span class="stat-label">Productos registrados</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statValor">$0.00</span>
+            <span class="stat-label">Valor del inventario</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statBajo">0</span>
+            <span class="stat-label">Sin stock / bajo stock</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statVentas">$0.00</span>
+            <span class="stat-label">Ventas acumuladas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="card form-card">
+          <h2 id="tituloFormulario">Registrar Producto</h2>
+          <form id="formProducto" class="form">
+            <input type="hidden" id="productoId">
+            <div class="form-group">
+              <label for="nombre">Nombre del producto</label>
+              <input type="text" id="nombre" required placeholder="Ej. Arroz">
+            </div>
+            <div class="form-group">
+              <label for="cantidad">Cantidad disponible</label>
+              <input type="number" id="cantidad" required min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="precio">Precio unitario ($)</label>
+              <input type="number" id="precio" required min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label for="stockMinimo">Stock mínimo para alerta</label>
+              <input type="number" id="stockMinimo" min="0" value="5" placeholder="5">
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+              <button type="button" class="btn btn-secondary" id="btnCancelar" hidden>Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card search-card">
+          <h2>Buscar Productos</h2>
+          <input type="text" id="buscador" class="buscar" placeholder="Buscar por nombre...">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tabla-header">
+          <h2>Inventario</h2>
+          <span class="contador" id="contadorProductos">0 productos</span>
+        </div>
+        <div class="tabla-wrapper">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio ($)</th>
+                <th>Subtotal ($)</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInventario"></tbody>
+          </table>
+        </div>
+        <p class="vacio" id="vacioInvisible" hidden>No hay productos registrados.</p>
+      </section>
+    </section>
+
+    <!-- ========== VISTA VENTAS ========== -->
+    <section class="vista" id="vistaVentas">
+      <section class="stats" id="statsVentas">
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statTotalVentas">$0.00</span>
+            <span class="stat-label">Ventas acumuladas</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statUnidades">0</span>
+            <span class="stat-label">Unidades vendidas</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statNumVentas">0</span>
+            <span class="stat-label">Cantidad de ventas</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-numero" id="statPromedio">$0.00</span>
+            <span class="stat-label">Ticket promedio</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card grafico-card">
+        <h2>Diagrama circular: unidades vendidas por producto</h2>
+        <div class="grafico-contenido">
+          <div class="grafico-torta">
+            <canvas id="graficoDona"></canvas>
+            <div class="grafico-centro">
+              <span id="graficoTotal">0</span>
+              <small>vendidas</small>
+            </div>
+          </div>
+          <div class="grafico-leyenda" id="leyendaDona"></div>
+        </div>
+        <p class="vacio" id="vacioGrafico" hidden>Sin ventas para graficar.</p>
+      </section>
+
+      <section class="card">
+        <div class="tabla-header">
+          <h2>Base de datos de ventas</h2>
+          <button class="btn btn-primary" id="btnNuevaVenta">+ Nueva venta</button>
+        </div>
+        <input type="text" id="buscadorVentas" class="buscar" placeholder="Buscar venta por producto...">
+        <div class="tabla-wrapper">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unit. ($)</th>
+                <th>Total ($)</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaVentas"></tbody>
+          </table>
+        </div>
+        <p class="vacio" id="vacioVentas" hidden>No hay ventas registradas.</p>
+        <div class="total-ventas">
+          <strong>Total de ventas: </strong>$ <span id="totalVentas">0.00</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- ========== MODAL DE VENTA ========== -->
+  <div class="modal-backdrop" id="modalVenta" hidden>
+    <div class="modal">
+      <h2>Registrar Venta</h2>
+      <form id="formVenta">
+        <div class="form-group">
+          <label for="ventaSelector">Producto</label>
+          <select id="ventaSelector" class="buscar" required></select>
+        </div>
+        <div class="form-group">
+          <label for="ventaPrecio">Precio unitario ($)</label>
+          <input type="text" id="ventaPrecio" disabled>
+        </div>
+        <div class="form-group">
+          <label for="ventaStock">Stock disponible</label>
+          <input type="text" id="ventaStock" disabled>
+        </div>
+        <div class="form-group">
+          <label for="ventaCantidad">Cantidad a vender</label>
+          <input type="number" id="ventaCantidad" required min="1" placeholder="1">
+        </div>
+        <div class="form-group">
+          <label for="ventaTotal">Total de la venta ($)</label>
+          <input type="text" id="ventaTotal" disabled>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Confirmar venta</button>
+          <button type="button" class="btn btn-secondary" id="btnCerrarVentana">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
